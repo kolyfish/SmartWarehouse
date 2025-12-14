@@ -1,0 +1,24 @@
+# 測試框架
+playwright==1.40.0
+pytest==7.4.3
+pytest-playwright==0.4.3
+pytest-html==4.1.1
+pytest-json-report==1.5.0
+
+# 後端 API
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# GCP Firestore
+google-cloud-firestore==2.13.1
+google-auth==2.25.2
+
+# 工具
+python-dotenv==1.0.0
+requests==2.31.0
+
+# 注意：JMeter 需要單獨安裝
+# macOS: brew install jmeter
+# 或下載：https://jmeter.apache.org/download_jmeter.cgi
+

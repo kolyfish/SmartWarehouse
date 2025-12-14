@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Java
+*.class
+*.log
+*.jar
+*.war
+*.ear
+target/
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.iml
+.classpath
+.project
+.settings/
+
+# 環境變數
+.env
+*.json
+!package.json
+
+# 測試結果
+test-results/
+playwright-report/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# 日誌
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# H2 Database files
+*.mv.db
+*.trace.db
