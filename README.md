@@ -2,17 +2,17 @@
 
 ## 📋 專案簡介
 
-這是一個**完全免費**的全端作品集專案，整合了：
+這是一個的全端作品集專案，整合了：
 
 - ✅ **Spring Boot** - Java 後端框架（飲料庫存管理）
-- ✅ **H2 Database** - 內存 SQL 資料庫（完全免費）
+- ✅ **H2 Database** - 內存 SQL 資料庫
 - ✅ **悲觀鎖機制** - 確保高併發下的資料一致性
 - ✅ **JMeter** - 壓力測試工具（驗證資料一致性）
 - ✅ **TDD 測試** - 測試驅動開發（高併發測試案例）
 - ✅ **Playwright** - Python 自動化測試框架
 - ✅ **FastAPI** - Python 輕量級後端框架
-- ✅ **Firestore** - GCP NoSQL 資料庫（免費層）
-- ✅ **GitHub Actions** - 免費 CI/CD（每月 2000 分鐘）
+- ✅ **Firestore** - GCP NoSQL 資料庫
+- ✅ **GitHub Actions** - CI/CD
 
 ## 🎯 核心功能
 
