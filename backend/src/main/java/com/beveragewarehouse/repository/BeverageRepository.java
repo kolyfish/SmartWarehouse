@@ -40,10 +40,22 @@ public interface BeverageRepository extends JpaRepository<Beverage, Long> {
     List<Beverage> findNonExpiredBeverages(LocalDate today);
     
     /**
-     * 查詢所有已過期的飲料
+     * 查詢所有已過期的飲料（包含所有狀態）
      */
     @Query("SELECT b FROM Beverage b WHERE b.expiryDate < :today")
     List<Beverage> findExpiredBeverages(LocalDate today);
+    
+    /**
+     * 查詢隔離區中的商品（QUARANTINED 狀態）
+     */
+    @Query("SELECT b FROM Beverage b WHERE b.status = 'QUARANTINED'")
+    List<Beverage> findQuarantinedBeverages();
+    
+    /**
+     * 查詢已報廢的商品（DISPOSED 狀態）
+     */
+    @Query("SELECT b FROM Beverage b WHERE b.status = 'DISPOSED'")
+    List<Beverage> findDisposedBeverages();
     
     /**
      * 查詢即將過期的飲料（7 天內）
@@ -54,9 +66,10 @@ public interface BeverageRepository extends JpaRepository<Beverage, Long> {
     /**
      * 根據名稱和有效期限查詢（用於出庫時選擇最早過期的）
      * 使用悲觀鎖確保高併發下的資料一致性
+     * 只查詢 NORMAL 狀態的商品（過期商品已隔離，不能出庫）
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT b FROM Beverage b WHERE b.name = :name AND b.quantity > 0 AND b.expiryDate >= :today ORDER BY b.expiryDate ASC")
+    @Query("SELECT b FROM Beverage b WHERE b.name = :name AND b.quantity > 0 AND b.expiryDate >= :today AND b.status = 'NORMAL' ORDER BY b.expiryDate ASC")
     List<Beverage> findAvailableBeveragesByNameOrderByExpiryWithLock(
             @Param("name") String name, 
             @Param("today") LocalDate today

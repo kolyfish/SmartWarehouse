@@ -9,6 +9,7 @@
 - ✅ **悲觀鎖機制** - 確保高併發下的資料一致性
 - ✅ **JMeter** - 壓力測試工具（驗證資料一致性）
 - ✅ **TDD 測試** - 測試驅動開發（高併發測試案例）
+- ✅ **ISTQB 測試理論** - V 模型完整應用（單元→整合→系統→驗收）
 - ✅ **Playwright** - Python 自動化測試框架
 - ✅ **FastAPI** - Python 輕量級後端框架
 - ✅ **Firestore** - GCP NoSQL 資料庫
@@ -36,6 +37,18 @@
 - ✅ **自動化測試執行** - GitHub Actions 觸發 Playwright 測試
 - ✅ **測試結果存儲** - 結果自動寫入 Firestore
 - ✅ **測試報告 API** - FastAPI 提供測試結果查詢
+
+### 3. ISTQB 測試理論實踐（V 模型完整應用）⭐
+- ✅ **V 模型第一層：單元測試**
+  - 等價類劃分、邊界值分析、決策表測試
+- ✅ **V 模型第二層：整合測試**
+  - 狀態轉換測試（Service + Repository）
+- ✅ **V 模型第三層：系統測試**
+  - 用例測試（基本流、替代流、異常流）
+  - 高併發測試（效能、壓力）
+- ✅ **V 模型第四層：驗收測試**
+  - 驗收標準驗證（AC1、AC2、AC3）
+- ✅ **測試管理** - 風險導向測試、測試計劃、測試監控
 
 ## 🛠️ 技術棧
 
@@ -78,8 +91,14 @@ CI/CD: GitHub Actions
 │   │   ├── service/            # 業務邏輯層（事務管理）
 │   │   ├── controller/        # REST API Controller
 │   │   └── dto/                # 資料傳輸物件
-│   ├── src/test/java/          # TDD 測試案例
-│   │   └── BeverageServiceConcurrencyTest.java
+│   ├── src/test/java/          # ISTQB 測試案例（V 模型完整應用）
+│   │   ├── BeverageServiceVModelTest.java           # V 模型完整測試
+│   │   ├── BeverageServiceConcurrencyTest.java      # 高併發測試（系統/驗收）
+│   │   ├── BeverageServiceEquivalencePartitioningTest.java  # 等價類劃分（單元）
+│   │   ├── BeverageServiceBoundaryValueTest.java    # 邊界值分析（單元）
+│   │   ├── BeverageServiceDecisionTableTest.java    # 決策表測試（單元）
+│   │   ├── BeverageStateTransitionTest.java         # 狀態轉換測試（整合）
+│   │   └── BeverageUseCaseTest.java                 # 用例測試（系統）
 │   ├── src/main/resources/
 │   │   ├── application.properties
 │   │   └── data.sql
@@ -260,6 +279,13 @@ List<Beverage> findAvailableBeveragesByNameOrderByExpiryWithLock(...);
 5. **分層架構** - Controller → Service → Repository
 6. **資料驗證** - Jakarta Validation
 
+### ISTQB 測試理論實踐
+1. **測試設計技術** - 等價類劃分、邊界值分析、決策表、狀態轉換
+2. **測試級別** - 單元測試、整合測試、系統測試、驗收測試
+3. **測試類型** - 功能測試、非功能測試（效能、壓力）
+4. **測試管理** - 風險導向測試、測試計劃、測試監控
+5. **測試基礎原則** - 7 個 ISTQB 測試原則的實際應用
+
 ### 測試與 DevOps
 1. **TDD 測試** - 測試驅動開發
 2. **壓力測試** - JMeter 高併發測試
@@ -272,9 +298,11 @@ List<Beverage> findAvailableBeveragesByNameOrderByExpiryWithLock(...);
 1. ✅ **全端能力**：Java Spring Boot + Python FastAPI
 2. ✅ **資料庫經驗**：SQL (H2) + NoSQL (Firestore)
 3. ✅ **高併發處理**：悲觀鎖機制確保資料一致性
-4. ✅ **測試專業**：TDD + JMeter 壓力測試
-5. ✅ **自動化思維**：CI/CD 最佳實踐
-6. ✅ **成本意識**：完全使用免費服務
+4. ✅ **測試專業**：ISTQB 測試理論 + TDD + JMeter 壓力測試
+5. ✅ **系統化測試**：等價類、邊界值、決策表、狀態轉換測試
+6. ✅ **多層級測試**：單元、整合、系統、驗收測試完整覆蓋
+7. ✅ **自動化思維**：CI/CD 最佳實踐
+8. ✅ **成本意識**：完全使用免費服務
 
 ## 🚀 下一步擴展
 
@@ -292,6 +320,10 @@ List<Beverage> findAvailableBeveragesByNameOrderByExpiryWithLock(...);
 - [API 使用範例](./API_EXAMPLES.md)
 - [JMeter 測試說明](./jmeter/README.md)
 - [Git 設定指南](./GIT_SETUP.md)
+- [ISTQB 測試理論應用](./ISTQB_TEST_THEORY.md) ⭐
+- [ISTQB 應用總結](./ISTQB_APPLICATION_SUMMARY.md) ⭐
+- [V 模型完整應用](./V_MODEL_APPLICATION.md) ⭐⭐
+- [執行 ISTQB 測試指南](./RUN_ISTQB_TESTS.md)
 
 ## 📝 License
 

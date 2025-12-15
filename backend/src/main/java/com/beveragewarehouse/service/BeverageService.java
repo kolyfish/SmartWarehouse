@@ -5,12 +5,14 @@ import com.beveragewarehouse.dto.BeverageRequestDTO;
 import com.beveragewarehouse.dto.StockInRequestDTO;
 import com.beveragewarehouse.dto.StockOutRequestDTO;
 import com.beveragewarehouse.model.Beverage;
+import com.beveragewarehouse.model.BeverageStatus;
 import com.beveragewarehouse.repository.BeverageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -194,6 +196,70 @@ public class BeverageService {
     }
     
     /**
+     * 自動隔離過期商品（業界標準流程）
+     * 
+     * 通常由定時任務（Scheduler）每日執行
+     * 將所有過期且狀態為 NORMAL 的商品自動改為 QUARANTINED
+     */
+    @Transactional
+    public int quarantineExpiredBeverages() {
+        LocalDate today = LocalDate.now();
+        List<Beverage> expiredBeverages = beverageRepository.findExpiredBeverages(today);
+        
+        int quarantinedCount = 0;
+        for (Beverage beverage : expiredBeverages) {
+            if (beverage.getStatus() == BeverageStatus.NORMAL) {
+                beverage.setStatus(BeverageStatus.QUARANTINED);
+                beverageRepository.save(beverage);
+                quarantinedCount++;
+            }
+        }
+        
+        return quarantinedCount;
+    }
+    
+    /**
+     * 取得隔離區中的商品（QUARANTINED 狀態）
+     */
+    public List<BeverageDTO> getQuarantinedBeverages() {
+        return beverageRepository.findQuarantinedBeverages().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * 報廢商品（業界標準流程）
+     * 
+     * 將隔離區中的商品標記為已報廢
+     * 通常需要審批流程，這裡簡化為直接報廢
+     */
+    @Transactional
+    public BeverageDTO disposeBeverage(Long id, String reason) {
+        Beverage beverage = beverageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("商品不存在，ID: " + id));
+        
+        if (beverage.getStatus() != BeverageStatus.QUARANTINED) {
+            throw new RuntimeException("只能報廢隔離區中的商品，當前狀態: " + beverage.getStatus());
+        }
+        
+        beverage.setStatus(BeverageStatus.DISPOSED);
+        beverage.setDisposalReason(reason);
+        beverage.setDisposedAt(LocalDateTime.now());
+        
+        Beverage disposed = beverageRepository.save(beverage);
+        return convertToDTO(disposed);
+    }
+    
+    /**
+     * 取得已報廢的商品列表（DISPOSED 狀態）
+     */
+    public List<BeverageDTO> getDisposedBeverages() {
+        return beverageRepository.findDisposedBeverages().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
      * 轉換 Entity 為 DTO
      */
     private BeverageDTO convertToDTO(Beverage beverage) {
@@ -208,6 +274,9 @@ public class BeverageService {
         dto.setExpired(beverage.isExpired());
         dto.setDaysUntilExpiry(beverage.getDaysUntilExpiry());
         dto.setExpiringSoon(beverage.isExpiringSoon());
+        dto.setStatus(beverage.getStatus());
+        dto.setDisposalReason(beverage.getDisposalReason());
+        dto.setDisposedAt(beverage.getDisposedAt());
         return dto;
     }
     

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartWarehouse - 智慧倉庫管理系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        .card-hover {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🏭 SmartWarehouse</h1>
+            <p class="text-gray-600">智慧倉庫管理系統 - 飲料庫存管理</p>
+        </header>
+
+        <!-- API 設定 -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">API 基礎 URL</label>
+            <div class="flex gap-2">
+                <input type="text" id="apiUrl" value="http://localhost:8080/api/beverages" 
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <button onclick="updateApiUrl()" 
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    更新
+                </button>
+            </div>
+        </div>
+
+        <!-- 統計卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm mb-1">總庫存項目</p>
+                        <p class="text-3xl font-bold text-gray-800" id="totalItems">-</p>
+                    </div>
+                    <div class="text-4xl">📦</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm mb-1">總庫存數量</p>
+                        <p class="text-3xl font-bold text-blue-600" id="totalQuantity">-</p>
+                    </div>
+                    <div class="text-4xl">📊</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm mb-1">已過期數量</p>
+                        <p class="text-3xl font-bold text-red-600" id="expiredQuantity">-</p>
+                    </div>
+                    <div class="text-4xl">⚠️</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm mb-1">即將過期（7天內）</p>
+                        <p class="text-3xl font-bold text-orange-600" id="expiringSoonQuantity">-</p>
+                    </div>
+                    <div class="text-4xl">⏰</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按鈕 -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div class="flex flex-wrap gap-2">
+                <button onclick="loadStatistics()" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    🔄 重新整理統計
+                </button>
+                <button onclick="loadAllBeverages()" 
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    📋 查看所有庫存
+                </button>
+                <button onclick="loadExpired()" 
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                    ⚠️ 查看已過期
+                </button>
+                <button onclick="loadExpiringSoon()" 
+                        class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
+                    ⏰ 查看即將過期
+                </button>
+                <button onclick="loadQuarantined()" 
+                        class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">
+                    🚧 查看隔離區
+                </button>
+                <button onclick="loadDisposed()" 
+                        class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    🗑️ 查看已報廢
+                </button>
+            </div>
+        </div>
+
+        <!-- 庫存列表 -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-800" id="listTitle">庫存列表</h2>
+                <span class="text-sm text-gray-500" id="listCount">共 0 筆</span>
+            </div>
+            <div id="loading" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="mt-2 text-gray-600">載入中...</p>
+            </div>
+            <div id="error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <p class="text-red-800" id="errorMessage"></p>
+            </div>
+            <div id="beverageList" class="space-y-4">
+                <p class="text-center text-gray-500 py-8">點擊上方按鈕查看庫存資訊</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiBaseUrl = 'http://localhost:8080/api/beverages';
+
+        function updateApiUrl() {
+            const input = document.getElementById('apiUrl');
+            apiBaseUrl = input.value.replace(/\/$/, ''); // 移除結尾的斜線
+            loadStatistics();
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('beverageList').innerHTML = '';
+            document.getElementById('error').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function showError(message) {
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'NORMAL': '<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">正常</span>',
+                'QUARANTINED': '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">隔離中</span>',
+                'DISPOSED': '<span class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">已報廢</span>'
+            };
+            return badges[status] || '<span class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">' + status + '</span>';
+        }
+
+        function renderBeverageCard(beverage) {
+            const expiredClass = beverage.expired ? 'border-red-300 bg-red-50' : '';
+            const expiringSoonClass = beverage.expiringSoon ? 'border-orange-300 bg-orange-50' : '';
+            
+            return `
+                <div class="border rounded-lg p-4 fade-in ${expiredClass} ${expiringSoonClass}">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-800">${beverage.name || '未命名'}</h3>
+                            <p class="text-sm text-gray-500">ID: ${beverage.id}</p>
+                        </div>
+                        ${beverage.status ? getStatusBadge(beverage.status) : ''}
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                            <p class="text-gray-600">數量</p>
+                            <p class="font-bold text-blue-600 text-lg">${beverage.quantity || 0}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">生產日期</p>
+                            <p class="font-medium">${formatDate(beverage.productionDate)}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">有效期限</p>
+                            <p class="font-medium ${beverage.expired ? 'text-red-600' : ''}">${formatDate(beverage.expiryDate)}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">狀態</p>
+                            <p class="font-medium">
+                                ${beverage.expired ? '<span class="text-red-600">已過期</span>' : ''}
+                                ${beverage.expiringSoon ? '<span class="text-orange-600">即將過期</span>' : ''}
+                                ${!beverage.expired && !beverage.expiringSoon ? '<span class="text-green-600">正常</span>' : ''}
+                            </p>
+                        </div>
+                    </div>
+                    ${beverage.daysUntilExpiry !== undefined ? `
+                        <div class="mt-3 pt-3 border-t">
+                            <p class="text-sm text-gray-600">
+                                距離過期: <span class="font-medium ${beverage.daysUntilExpiry < 7 ? 'text-orange-600' : 'text-gray-800'}">${beverage.daysUntilExpiry} 天</span>
+                            </p>
+                        </div>
+                    ` : ''}
+                    ${beverage.disposalReason ? `
+                        <div class="mt-3 pt-3 border-t">
+                            <p class="text-sm text-gray-600">報廢原因: <span class="font-medium">${beverage.disposalReason}</span></p>
+                            ${beverage.disposedAt ? `<p class="text-xs text-gray-500 mt-1">報廢時間: ${formatDate(beverage.disposedAt)}</p>` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function fetchAPI(endpoint) {
+            try {
+                const response = await fetch(`${apiBaseUrl}${endpoint}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                throw new Error(`無法連接到 API: ${error.message}`);
+            }
+        }
+
+        async function loadStatistics() {
+            try {
+                showLoading();
+                const data = await fetchAPI('/statistics');
+                
+                document.getElementById('totalItems').textContent = data.totalItems || 0;
+                document.getElementById('totalQuantity').textContent = data.totalQuantity || 0;
+                document.getElementById('expiredQuantity').textContent = data.expiredQuantity || 0;
+                document.getElementById('expiringSoonQuantity').textContent = data.expiringSoonQuantity || 0;
+                
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+
+        async function loadAllBeverages() {
+            try {
+                showLoading();
+                document.getElementById('listTitle').textContent = '所有庫存';
+                const beverages = await fetchAPI('');
+                
+                document.getElementById('listCount').textContent = `共 ${beverages.length} 筆`;
+                document.getElementById('beverageList').innerHTML = beverages.length > 0
+                    ? beverages.map(b => renderBeverageCard(b)).join('')
+                    : '<p class="text-center text-gray-500 py-8">目前沒有庫存</p>';
+                
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+
+        async function loadExpired() {
+            try {
+                showLoading();
+                document.getElementById('listTitle').textContent = '已過期商品';
+                const beverages = await fetchAPI('/expired');
+                
+                document.getElementById('listCount').textContent = `共 ${beverages.length} 筆`;
+                document.getElementById('beverageList').innerHTML = beverages.length > 0
+                    ? beverages.map(b => renderBeverageCard(b)).join('')
+                    : '<p class="text-center text-gray-500 py-8">目前沒有過期商品</p>';
+                
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+
+        async function loadExpiringSoon() {
+            try {
+                showLoading();
+                document.getElementById('listTitle').textContent = '即將過期商品（7天內）';
+                const beverages = await fetchAPI('/expiring-soon');
+                
+                document.getElementById('listCount').textContent = `共 ${beverages.length} 筆`;
+                document.getElementById('beverageList').innerHTML = beverages.length > 0
+                    ? beverages.map(b => renderBeverageCard(b)).join('')
+                    : '<p class="text-center text-gray-500 py-8">目前沒有即將過期的商品</p>';
+                
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+
+        async function loadQuarantined() {
+            try {
+                showLoading();
+                document.getElementById('listTitle').textContent = '隔離區商品';
+                const beverages = await fetchAPI('/quarantined');
+                
+                document.getElementById('listCount').textContent = `共 ${beverages.length} 筆`;
+                document.getElementById('beverageList').innerHTML = beverages.length > 0
+                    ? beverages.map(b => renderBeverageCard(b)).join('')
+                    : '<p class="text-center text-gray-500 py-8">目前隔離區沒有商品</p>';
+                
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+
+        async function loadDisposed() {
+            try {
+                showLoading();
+                document.getElementById('listTitle').textContent = '已報廢商品';
+                const beverages = await fetchAPI('/disposed');
+                
+                document.getElementById('listCount').textContent = `共 ${beverages.length} 筆`;
+                document.getElementById('beverageList').innerHTML = beverages.length > 0
+                    ? beverages.map(b => renderBeverageCard(b)).join('')
+                    : '<p class="text-center text-gray-500 py-8">目前沒有已報廢的商品</p>';
+                
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+
+        // 頁面載入時自動載入統計
+        window.addEventListener('load', () => {
+            loadStatistics();
+        });
+    </script>
+</body>
+</html>
+

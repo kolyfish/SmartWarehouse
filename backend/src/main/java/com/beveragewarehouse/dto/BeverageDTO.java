@@ -1,5 +1,6 @@
 package com.beveragewarehouse.dto;
 
+import com.beveragewarehouse.model.BeverageStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,5 +40,23 @@ public class BeverageDTO {
      * 是否即將過期（計算欄位）
      */
     private Boolean expiringSoon;
+    
+    /**
+     * 商品狀態（業界標準）
+     * NORMAL: 正常商品
+     * QUARANTINED: 隔離中（已過期）
+     * DISPOSED: 已報廢
+     */
+    private BeverageStatus status;
+    
+    /**
+     * 報廢原因（僅在 DISPOSED 狀態時使用）
+     */
+    private String disposalReason;
+    
+    /**
+     * 報廢時間（僅在 DISPOSED 狀態時使用）
+     */
+    private LocalDateTime disposedAt;
 }
 

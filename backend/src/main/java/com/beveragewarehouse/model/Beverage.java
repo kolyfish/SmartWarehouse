@@ -64,6 +64,27 @@ public class Beverage {
     private LocalDateTime updatedAt;
     
     /**
+     * 商品狀態
+     * NORMAL: 正常商品，可以正常出庫
+     * QUARANTINED: 隔離中，已過期但尚未處理
+     * DISPOSED: 已報廢，已從庫存中移除
+     */
+    @Column(nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private BeverageStatus status = BeverageStatus.NORMAL;
+    
+    /**
+     * 報廢原因（僅在 DISPOSED 狀態時使用）
+     */
+    @Column(length = 500)
+    private String disposalReason;
+    
+    /**
+     * 報廢時間（僅在 DISPOSED 狀態時使用）
+     */
+    private LocalDateTime disposedAt;
+    
+    /**
      * 是否已過期
      */
     @Transient
