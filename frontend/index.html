@@ -85,7 +85,16 @@
 
         <!-- 操作按鈕 -->
         <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">操作功能</h3>
             <div class="flex flex-wrap gap-2">
+                <button onclick="openStockInModal()" 
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+                    ➕ 入庫飲料
+                </button>
+                <button onclick="openStockOutModal()" 
+                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium">
+                    ➖ 出庫飲料
+                </button>
                 <button onclick="loadStatistics()" 
                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                     🔄 重新整理統計
@@ -111,6 +120,95 @@
                     🗑️ 查看已報廢
                 </button>
             </div>
+        </div>
+
+        <!-- 入庫 Modal -->
+        <div id="stockInModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800">➕ 入庫飲料</h3>
+                    <button onclick="closeStockInModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <form id="stockInForm" onsubmit="handleStockIn(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">飲料名稱 *</label>
+                            <input type="text" id="stockInName" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   placeholder="例如：礦泉水">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">數量 *</label>
+                            <input type="number" id="stockInQuantity" required min="1"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   placeholder="例如：100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">生產日期 *</label>
+                            <input type="date" id="stockInProductionDate" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">有效期限 *</label>
+                            <input type="date" id="stockInExpiryDate" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button type="submit" 
+                                class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+                            確認入庫
+                        </button>
+                        <button type="button" onclick="closeStockInModal()"
+                                class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                            取消
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 出庫 Modal -->
+        <div id="stockOutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800">➖ 出庫飲料</h3>
+                    <button onclick="closeStockOutModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <form id="stockOutForm" onsubmit="handleStockOut(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">飲料名稱 *</label>
+                            <input type="text" id="stockOutName" required list="beverageNames"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                   placeholder="輸入飲料名稱">
+                            <datalist id="beverageNames"></datalist>
+                            <p class="text-xs text-gray-500 mt-1">系統會自動選擇最早過期的批次出庫</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">出庫數量 *</label>
+                            <input type="number" id="stockOutQuantity" required min="1"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                   placeholder="例如：30">
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button type="submit" 
+                                class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium">
+                            確認出庫
+                        </button>
+                        <button type="button" onclick="closeStockOutModal()"
+                                class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                            取消
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 成功/錯誤提示 -->
+        <div id="toast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            <p id="toastMessage"></p>
         </div>
 
         <!-- 庫存列表 -->
@@ -342,6 +440,146 @@
             }
         }
 
+        // 入庫 Modal 功能
+        function openStockInModal() {
+            document.getElementById('stockInModal').classList.remove('hidden');
+            // 設定預設日期（今天）
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('stockInProductionDate').value = today;
+            // 設定有效期限為一年後
+            const nextYear = new Date();
+            nextYear.setFullYear(nextYear.getFullYear() + 1);
+            document.getElementById('stockInExpiryDate').value = nextYear.toISOString().split('T')[0];
+        }
+
+        function closeStockInModal() {
+            document.getElementById('stockInModal').classList.add('hidden');
+            document.getElementById('stockInForm').reset();
+        }
+
+        async function handleStockIn(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('stockInName').value;
+            const quantity = parseInt(document.getElementById('stockInQuantity').value);
+            const productionDate = document.getElementById('stockInProductionDate').value;
+            const expiryDate = document.getElementById('stockInExpiryDate').value;
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/stock-in`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        quantity: quantity,
+                        productionDate: productionDate,
+                        expiryDate: expiryDate
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || '入庫失敗');
+                }
+
+                const result = await response.json();
+                showToast(`✅ 成功入庫 ${quantity} 瓶 ${name}！`, 'success');
+                closeStockInModal();
+                loadStatistics();
+                loadAllBeverages();
+            } catch (error) {
+                showToast(`❌ ${error.message}`, 'error');
+            }
+        }
+
+        // 出庫 Modal 功能
+        function openStockOutModal() {
+            document.getElementById('stockOutModal').classList.remove('hidden');
+            loadBeverageNames();
+        }
+
+        function closeStockOutModal() {
+            document.getElementById('stockOutModal').classList.add('hidden');
+            document.getElementById('stockOutForm').reset();
+        }
+
+        async function loadBeverageNames() {
+            try {
+                const beverages = await fetchAPI('');
+                const uniqueNames = [...new Set(beverages.map(b => b.name))];
+                const datalist = document.getElementById('beverageNames');
+                datalist.innerHTML = uniqueNames.map(name => 
+                    `<option value="${name}">${name}</option>`
+                ).join('');
+            } catch (error) {
+                console.error('載入飲料名稱失敗:', error);
+            }
+        }
+
+        async function handleStockOut(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('stockOutName').value;
+            const quantity = parseInt(document.getElementById('stockOutQuantity').value);
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/stock-out`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        quantity: quantity
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || '出庫失敗');
+                }
+
+                const result = await response.json();
+                showToast(`✅ ${result.message || `成功出庫 ${quantity} 瓶 ${name}！`}`, 'success');
+                closeStockOutModal();
+                loadStatistics();
+                loadAllBeverages();
+            } catch (error) {
+                showToast(`❌ ${error.message}`, 'error');
+            }
+        }
+
+        // Toast 提示功能
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white`;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 點擊 Modal 外部關閉
+        document.getElementById('stockInModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'stockInModal') {
+                closeStockInModal();
+            }
+        });
+
+        document.getElementById('stockOutModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'stockOutModal') {
+                closeStockOutModal();
+            }
+        });
+
         // 頁面載入時自動載入統計
         window.addEventListener('load', () => {
             loadStatistics();
@@ -349,4 +587,5 @@
     </script>
 </body>
 </html>
+
 

@@ -1,0 +1,56 @@
+services:
+  # Spring Boot 應用服務
+  smart-warehouse:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-warehouse-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:beveragewarehouse
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_H2_CONSOLE_ENABLED=true
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/beverages/statistics"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    networks:
+      - smart-warehouse-network
+    restart: unless-stopped
+
+  # 可選：PostgreSQL 資料庫（生產環境使用）
+  # 如果需要在生產環境使用 PostgreSQL，可以取消註解以下服務
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: smart-warehouse-db
+  #   environment:
+  #     - POSTGRES_DB=beveragewarehouse
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   networks:
+  #     - smart-warehouse-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+networks:
+  smart-warehouse-network:
+    driver: bridge
+
+# volumes:
+#   postgres-data:
+
