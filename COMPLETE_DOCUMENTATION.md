@@ -392,7 +392,9 @@ BASE_URL=http://localhost:8080/api/beverages
 
 ## 1. 入庫管理（Stock In）
 
-### 入庫 100 瓶礦泉水
+**業務規則：一次入庫數量限制為 1-100 瓶**
+
+### 入庫 100 瓶礦泉水（最大值）
 
 ```bash
 curl -X POST http://localhost:8080/api/beverages/stock-in \
@@ -525,7 +527,7 @@ curl http://localhost:8080/api/beverages/disposed
 |------|------|------|--------|
 | GET | `/api/beverages` | 取得所有飲料 | - |
 | GET | `/api/beverages/{id}` | 根據 ID 取得飲料 | - |
-| POST | `/api/beverages/stock-in` | 入庫飲料 | - |
+| POST | `/api/beverages/stock-in` | 入庫飲料 | 一次入庫數量限制：1-100 瓶 |
 | POST | `/api/beverages/stock-out` | 出庫飲料 | 悲觀鎖 |
 | PUT | `/api/beverages/{id}` | 更新飲料資訊 | - |
 | DELETE | `/api/beverages/{id}` | 刪除飲料 | - |
@@ -1291,7 +1293,28 @@ curl -f http://localhost:8080/api/beverages/statistics
 - 查詢 API：`GET /api/beverages`
 - 出庫 API：`POST /api/beverages/stock-out`
 
-#### 5. 程式碼品質檢查（Code Quality）
+#### 5. Playwright 前端測試（Playwright Frontend Tests）
+
+- 使用 Playwright 測試前端介面
+- 執行邊界值測試（ISTQB Boundary Value Analysis）
+- 測試入庫/出庫表單的邊界值
+- 驗證表單驗證和業務邏輯
+
+**測試內容：**
+- 入庫數量邊界值（最小值、0、負數、大數值）
+- 出庫數量邊界值（最小值、超過庫存、等於庫存）
+- 日期邊界值（今天、過去、未來）
+- 表單驗證（必填欄位、格式驗證）
+- 統計顯示邊界值（空庫存狀態）
+
+**執行步驟：**
+1. 構建 Docker 映像
+2. 啟動後端服務（Docker 容器）
+3. 啟動前端服務（HTTP 伺服器）
+4. 執行 Playwright 邊界測試
+5. 上傳測試結果和報告
+
+#### 6. 程式碼品質檢查（Code Quality）
 
 - 檢查程式碼格式
 - 靜態程式碼分析（如果配置）
@@ -1306,8 +1329,26 @@ curl -f http://localhost:8080/api/beverages/statistics
 
 ### 工作流程檔案位置
 
-- `.github/workflows/ci-cd.yml` - 主要的 CI/CD 工作流程
+- `.github/workflows/ci-cd.yml` - 主要的 CI/CD 工作流程（包含 Playwright 測試）
 - `.github/workflows/ci.yml` - Python/Playwright 測試工作流程（如果有的話）
+
+### Playwright 測試階段
+
+**測試檔案：**
+- `tests/test_frontend_boundary.py` - 完整邊界測試（14 個測試案例）
+- `tests/test_frontend_boundary_mcp.py` - Playwright MCP 邊界測試（8 個測試案例）
+
+**測試涵蓋：**
+- 入庫數量邊界值（最小值、0、負數、大數值）
+- 出庫數量邊界值（最小值、超過庫存、等於庫存）
+- 日期邊界值（今天、過去、未來）
+- 表單驗證（必填欄位、格式驗證）
+- 統計顯示邊界值（空庫存狀態）
+
+**執行環境：**
+- 後端：Docker 容器（端口 8080）
+- 前端：HTTP 伺服器（端口 8000）
+- 瀏覽器：Chromium（headless 模式）
 
 ## CI/CD 優勢
 

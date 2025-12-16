@@ -101,3 +101,4 @@ echo "2. 直接嘗試啟動服務，如果失敗會看到錯誤訊息"
 echo "3. 使用不同端口（修改 application.properties）"
 echo ""
 
+

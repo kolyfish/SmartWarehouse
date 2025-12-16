@@ -108,7 +108,7 @@ curl -X POST http://localhost:8080/api/beverages/stock-in \
 
 **資料內容：**
 - `"name": "礦泉水"`: 飲料名稱
-- `"quantity": 100`: 數量（100 瓶）
+- `"quantity": 100`: 數量（100 瓶，**一次入庫限制：1-100 瓶**）
 - `"productionDate": "2024-01-01"`: 生產日期
 - `"expiryDate": "2025-01-01"`: 有效期限
 
@@ -160,6 +160,53 @@ curl -X POST http://localhost:8080/api/beverages/stock-out \
 | 出庫 | POST | `/api/beverages/stock-out` |
 | 查看已過期 | GET | `/api/beverages/expired` |
 | 查看即將過期 | GET | `/api/beverages/expiring-soon` |
+
+---
+
+## 執行 Playwright 邊界測試
+
+### 前置需求
+
+1. 確保後端服務運行：
+   ```bash
+   docker compose up -d
+   # 或
+   cd backend && mvn spring-boot:run
+   ```
+
+2. 啟動前端服務：
+   ```bash
+   cd frontend
+   python3 -m http.server 8000
+   ```
+
+3. 安裝測試依賴：
+   ```bash
+   pip install -r requirements.txt
+   playwright install chromium
+   ```
+
+### 執行邊界測試
+
+```bash
+# 執行所有邊界測試
+pytest tests/test_frontend_boundary.py -v -m boundary
+
+# 執行特定測試
+pytest tests/test_frontend_boundary.py::TestFrontendBoundary::test_stock_in_quantity_minimum -v
+
+# 使用 Playwright MCP 測試
+pytest tests/test_frontend_boundary_mcp.py -v -m boundary
+```
+
+### 測試覆蓋範圍
+
+邊界測試涵蓋：
+- 入庫數量邊界值（最小值 1、0、負數、大數值）
+- 出庫數量邊界值（最小值、超過庫存、等於庫存）
+- 日期邊界值（今天、過去、未來）
+- 表單驗證（必填欄位、格式驗證）
+- 統計顯示邊界值（空庫存狀態）
 
 ---
 

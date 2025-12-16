@@ -1,5 +1,6 @@
 package com.beveragewarehouse.dto;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +23,7 @@ public class StockInRequestDTO {
     
     @NotNull(message = "數量不能為空")
     @Min(value = 1, message = "數量必須大於 0")
+    @Max(value = 100, message = "一次入庫數量不能超過 100 瓶")
     private Integer quantity;
     
     @NotNull(message = "生產日期不能為空")

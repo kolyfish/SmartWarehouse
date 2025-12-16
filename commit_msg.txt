@@ -1,0 +1,27 @@
+feat: 設定一次入庫數量限制為 100 瓶並整合 Playwright 測試到 CI/CD
+
+目的：
+1. 實作業務規則：一次入庫數量限制為 1-100 瓶
+2. 整合 Playwright 前端邊界測試到 GitHub Actions 工作流程
+
+調整項目：
+1. 後端驗證：
+   - StockInRequestDTO: 添加 @Max(value = 100) 驗證註解
+   - BeverageService: 添加業務邏輯驗證（雙重保護）
+   - BeverageServiceBoundaryValueTest: 添加入庫數量邊界值測試（最小值、最大值、最大值±1）
+
+2. 前端驗證：
+   - HTML 表單: 添加 max="100" 屬性和提示文字
+   - JavaScript: 在 handleStockIn() 中添加數量範圍驗證
+
+3. CI/CD 整合：
+   - .github/workflows/ci-cd.yml: 新增 playwright-test 階段
+   - 執行 Playwright 邊界測試（test_frontend_boundary.py、test_frontend_boundary_mcp.py）
+   - 構建 Docker 映像、啟動後端和前端服務、執行測試、上傳報告
+
+4. 文檔更新：
+   - COMPLETE_DOCUMENTATION.md: 更新 API 說明，標註數量限制
+   - QUICK_START.md: 更新入庫說明，加入限制說明
+
+ref #main
+

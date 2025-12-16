@@ -303,3 +303,4 @@ logging.level.com.beveragewarehouse=DEBUG
 
 **服務啟動成功後，就可以開始使用 SmartWarehouse 系統了！** 🎉
 
+

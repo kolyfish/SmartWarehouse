@@ -45,9 +45,16 @@ public class BeverageService {
     
     /**
      * 新增飲料（入庫）
+     * 
+     * 業務規則：一次入庫數量不能超過 100 瓶
      */
     @Transactional
     public BeverageDTO stockIn(StockInRequestDTO request) {
+        // 業務邏輯驗證：一次入庫數量不能超過 100 瓶
+        if (request.getQuantity() > 100) {
+            throw new RuntimeException("一次入庫數量不能超過 100 瓶，當前數量: " + request.getQuantity());
+        }
+        
         Beverage beverage = new Beverage();
         beverage.setName(request.getName());
         beverage.setQuantity(request.getQuantity());

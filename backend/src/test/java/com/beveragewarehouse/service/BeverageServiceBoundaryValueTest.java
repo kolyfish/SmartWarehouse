@@ -213,6 +213,83 @@ class BeverageServiceBoundaryValueTest {
         assertEquals(8, result.getDaysUntilExpiry());
     }
 
+    // ==================== 入庫數量邊界值測試 ====================
+
+    @Test
+    @DisplayName("邊界值測試 - 入庫數量最小值：1（最小有效值）")
+    void testStockIn_BoundaryValue_MinimumQuantity() {
+        StockInRequestDTO request = new StockInRequestDTO();
+        request.setName("礦泉水");
+        request.setQuantity(1); // 最小值
+        request.setProductionDate(LocalDate.now());
+        request.setExpiryDate(LocalDate.now().plusYears(1));
+
+        assertDoesNotThrow(() -> {
+            var result = beverageService.stockIn(request);
+            assertEquals(1, result.getQuantity());
+        });
+    }
+
+    @Test
+    @DisplayName("邊界值測試 - 入庫數量最大值：100（最大有效值）")
+    void testStockIn_BoundaryValue_MaximumQuantity() {
+        StockInRequestDTO request = new StockInRequestDTO();
+        request.setName("礦泉水");
+        request.setQuantity(100); // 最大值
+        request.setProductionDate(LocalDate.now());
+        request.setExpiryDate(LocalDate.now().plusYears(1));
+
+        assertDoesNotThrow(() -> {
+            var result = beverageService.stockIn(request);
+            assertEquals(100, result.getQuantity());
+        });
+    }
+
+    @Test
+    @DisplayName("邊界值測試 - 入庫數量最大值-1：99（邊界值-1）")
+    void testStockIn_BoundaryValue_MaximumMinusOne() {
+        StockInRequestDTO request = new StockInRequestDTO();
+        request.setName("礦泉水");
+        request.setQuantity(99); // 最大值-1
+        request.setProductionDate(LocalDate.now());
+        request.setExpiryDate(LocalDate.now().plusYears(1));
+
+        assertDoesNotThrow(() -> {
+            var result = beverageService.stockIn(request);
+            assertEquals(99, result.getQuantity());
+        });
+    }
+
+    @Test
+    @DisplayName("邊界值測試 - 入庫數量最大值+1：101（超過限制）")
+    void testStockIn_BoundaryValue_ExceedsMaximum() {
+        StockInRequestDTO request = new StockInRequestDTO();
+        request.setName("礦泉水");
+        request.setQuantity(101); // 最大值+1，應該失敗
+        request.setProductionDate(LocalDate.now());
+        request.setExpiryDate(LocalDate.now().plusYears(1));
+
+        // 應該拋出異常：一次入庫數量不能超過 100 瓶
+        assertThrows(RuntimeException.class, () -> {
+            beverageService.stockIn(request);
+        }, "一次入庫數量不能超過 100 瓶");
+    }
+
+    @Test
+    @DisplayName("邊界值測試 - 入庫數量：0（無效值）")
+    void testStockIn_BoundaryValue_ZeroQuantity() {
+        StockInRequestDTO request = new StockInRequestDTO();
+        request.setName("礦泉水");
+        request.setQuantity(0); // 無效值
+        request.setProductionDate(LocalDate.now());
+        request.setExpiryDate(LocalDate.now().plusYears(1));
+
+        // 應該失敗：@Min(value = 1) 驗證
+        assertThrows(Exception.class, () -> {
+            beverageService.stockIn(request);
+        });
+    }
+
     // ==================== 數量邊界值組合測試 ====================
 
     @Test
